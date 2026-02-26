@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PINKVERSE - Premium Animated UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Playfair+Display:wght:500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff3f6c;
+            --dark-pink: #d62b55;
+            --bg-grey: #fafafa;
+            --text-dark: #282c3f;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-grey);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* --- ANIMATION LIBRARY --- */
+        
+        /* 1. Ken Burns Hero Effect */
+        @keyframes kenBurns {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1) translateX(-2%); }
+            100% { transform: scale(1); }
+        }
+        .ken-burns { animation: kenBurns 20s ease-in-out infinite alternate; }
+
+        /* 2. Spring Bounce In */
+        @keyframes springBounce {
+            0% { opacity: 0; transform: translateY(40px) scale(0.8); }
+            60% { transform: translateY(-5px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .anim-spring { opacity: 0; animation: springBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        /* 3. Floating Wiggle */
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        /* 4. Button Ripple */
+        .ripple-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-effect 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* 5. Floating Shadow */
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .card-shadow:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(255, 63, 108, 0.2);
+        }
+
+        /* Sidebar */
+        .sidebar-anim {
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.24, 0.47, 0.49, 0.98);
+        }
+        .sidebar-anim.open { transform: translateX(0); }
+
+        /* UI Elements */
+        .product-img-box {
+            position: relative;
+            overflow: hidden;
+            height: 360px;
+        }
+        .product-img-box img {
+            transition: transform 0.6s ease;
+        }
+        .card-shadow:hover .product-img-box img {
+            transform: scale(1.1);
+        }
+
+        /* Cart Fly Animation */
+        .fly-img {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.9s cubic-bezier(0.17, 0.67, 0.32, 1.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Input Breathing */
+        input:focus {
+            animation: breathe 2s ease-in-out infinite alternate;
+        }
+        @keyframes breathe {
+            from { box-shadow: 0 0 0 0 rgba(255, 63, 108, 0.4); }
+            to { box-shadow: 0 0 0 8px rgba(255, 63, 108, 0); }
+        }
+
+        /* Success Checkmark */
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #ff3f6c;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #ff3f6c;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #ff3f6c; } }
+
+        /* Shimmer Loader */
+        .cms-loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: cms-shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes cms-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Overlay -->
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 hidden transition-all duration-500 opacity-0"></div>
+    
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar-anim fixed top-0 left-0 h-full w-72 bg-white shadow-2xl z-50 flex flex-col">
+        <div class="p-6 bg-gradient-to-br from-pink-600 to-red-500 text-white relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full"></div>
+            <h2 class="font-bold text-xl relative z-10">Menu</h2>
+        </div>
+        <nav class="p-4 flex-1 overflow-y-auto" id="sidebar-nav"></nav>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" class="transition-opacity duration-300"></div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-10 right-10 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-2xl hidden transform translate-y-20 transition-all duration-500 z-50 flex items-center gap-3">
+        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+        <span>Done</span>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DATA STORE (Strict JSON Format)
+        // ==========================================
+        const brands = ["Zentro", "NexaTech", "UrbanWeave", "StyleHive", "VoltEdge", "AuraWear", "SnapTrend", "Luxora", "PrimeGear", "NovaCart"];
+        const categories = [
+            { name: "Electronics", priceRange: [1999, 89999], imgKey: "laptop" },
+            { name: "Mobiles", priceRange: [7999, 69999], imgKey: "smartphone" },
+            { name: "Fashion", priceRange: [499, 4999], imgKey: "fashion" },
+            { name: "Shoes", priceRange: [799, 5999], imgKey: "shoes" },
+            { name: "Watches", priceRange: [999, 12999], imgKey: "watch" },
+            { name: "Beauty", priceRange: [199, 2999], imgKey: "beauty" },
+            { name: "Home & Kitchen", priceRange: [299, 9999], imgKey: "kitchen" },
+            { name: "Bags", priceRange: [399, 6999], imgKey: "handbag" }
+        ];
+
+        const DB = {
+            products: [],
+            cart: JSON.parse(localStorage.getItem('cart')) || [],
+            wishlist: JSON.parse(localStorage.getItem('wishlist')) || [],
+            user: { name: "Ananya Sharma", phone: "9988776655", pincode: "400069", address: "42, Linking Road", city: "Mumbai", state: "Maharashtra" }
+        };
+
+        const generateTitle = (brand, category) => {
+            const specs = {
+                "Mobiles": ["Pro 5G Smartphone", "Ultra Max Edition", "Edge Display"],
+                "Shoes": ["Running Sneakers", "Canvas Loafers", "Sports Elite"],
+                "default": ["Premium Edition", "Classic Series", "Trendy Collection"]
+            };
+            const suffix = specs[category] || specs['default'];
+            return `${brand} ${suffix[Math.floor(Math.random() * suffix.length)]}`;
+        };
+
+        // Generate Products
+        for(let i = 1; i <= 40; i++) {
+            const cat = categories[i % categories.length];
+            const brand = brands[Math.floor(Math.random() * brands.length)];
+            const price = Math.floor(Math.random() * (cat.priceRange[1] - cat.priceRange[0] + 1)) + cat.priceRange[0];
+            const discount = Math.floor(Math.random() * 60) + 5;
+            
+            DB.products.push({
+                id: i,
+                title: generateTitle(brand, cat.name),
+                brand: brand,
+                category: cat.name,
+                price: Math.round(price * (1 - discount/100)),
+                originalPrice: price,
+                discount: `${discount}%`,
+                rating: (Math.random() * 1.1 + 3.8).toFixed(1),
+                reviews: Math.floor(Math.random() * 9950) + 50,
+                image: `https://loremflickr.com/400/500/${cat.imgKey}?random=${i}`,
+                stock: Math.floor(Math.random() * 195) + 5
+            });
+        }
+
+        // ==========================================
+        // 2. UTILITIES
+        // ==========================================
+        const $ = (id) => document.getElementById(id);
+        const create = (tag, cls) => { const el = document.createElement(tag); el.className = cls; return el; };
+
+        const showToast = (msg) => {
+            const t = $('toast');
+            t.querySelector('span').innerText = msg;
+            t.classList.remove('hidden', 'translate-y-20');
+            setTimeout(() => t.classList.add('translate-y-20'), 3000);
+        };
+
+        const save = () => {
+            localStorage.setItem('cart', JSON.stringify(DB.cart));
+            updateCounts();
+        };
+
+        const updateCounts = () => {
+            const c = $('cart-count');
+            if(c) c.innerText = DB.cart.length;
+        };
+
+        // Ripple Effect Creator
+        const createRipple = (event) => {
+            const button = event.currentTarget;
+            const circle = document.createElement("span");
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+            circle.classList.add("ripple");
+
+            const ripple = button.getElementsByClassName("ripple")[0];
+            if (ripple) ripple.remove();
+
+            button.appendChild(circle);
+        };
+
+        // ==========================================
+        // 3. ROUTER
+        // ==========================================
+        const navigate = (page, data=null) => {
+            window.scrollTo(0,0);
+            const app = $('app');
+            app.style.opacity = 0;
+            app.style.transform = "translateY(10px)";
+            
+            setTimeout(() => {
+                app.innerHTML = '';
+                switch(page) {
+                    case 'home': renderHome(); break;
+                    case 'product': renderProduct(data); break;
+                    case 'cart': renderCart(); break;
+                    case 'checkout': renderCheckout(); break;
+                    case 'success': renderSuccess(); break;
+                    default: renderHome();
+                }
+                // Animate Page In
+                setTimeout(() => {
+                    app.style.opacity = 1;
+                    app.style.transform = "translateY(0)";
+                }, 50);
+            }, 300);
+        };
+
+        // ==========================================
+        // 4. RENDER: HEADER
+        // ==========================================
+        const renderHeader = () => {
+            const header = create('header', 'sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm');
+            header.innerHTML = `
+                <div class="flex items-center px-4 h-16">
+                    <button onclick="toggleSidebar()" class="p-2 mr-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <div class="font-bold text-2xl cursor-pointer pr-6" onclick="navigate('home')">
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-red-500">PINKVERSE</span>
+                    </div>
+                    
+                    <nav class="hidden lg:flex items-center h-full">
+                        ${categories.slice(0, 5).map(c => `<div class="px-3 py-4 text-xs font-semibold uppercase tracking-wide hover:text-pink-500 cursor-pointer transition-colors" onclick="filterProducts('${c.name}')">${c.name}</div>`).join('')}
+                    </nav>
+
+                    <div class="flex-1 px-6">
+                        <div class="search-box w-full max-w-xl flex items-center bg-gray-100 rounded-full px-4 py-2 transition-all focus-within:ring-2 ring-pink-300 focus-within:bg-white">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input type="text" id="search-input" placeholder="Search..." onkeyup="searchProducts(this.value)" class="bg-transparent border-none outline-none w-full ml-2 text-sm">
+                        </div>
+                    </div>
+
+                    <div id="cart-icon-container" class="relative cursor-pointer hover:text-pink-500 transition-all active:scale-90" onclick="navigate('cart')">
+                        <div class="p-2 rounded-full hover:bg-pink-50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return header;
+        };
+
+        const initSidebar = () => {
+            const nav = $('sidebar-nav');
+            nav.innerHTML = '';
+            const allBtn = create('a', 'block p-3 rounded hover:bg-pink-50 cursor-pointer text-sm font-bold text-pink-600 transition-colors');
+            allBtn.innerText = "All Products";
+            allBtn.onclick = () => filterProducts('All');
+            nav.appendChild(allBtn);
+            categories.forEach(c => {
+                const a = create('a', 'block p-3 rounded hover:bg-pink-50 cursor-pointer text-sm font-medium transition-colors hover:pl-5');
+                a.innerText = c.name;
+                a.onclick = () => filterProducts(c.name);
+                nav.appendChild(a);
+            });
+        };
+
+        // ==========================================
+        // 5. RENDER: HOME (Animated)
+        // ==========================================
+        const renderHome = () => {
+            const app = $('app');
+            app.appendChild(renderHeader());
+            initSidebar();
+
+            // Animated Hero
+            const banner = create('div', 'relative h-96 overflow-hidden');
+            banner.innerHTML = `
+                <div class="absolute inset-0 z-0">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200" class="w-full h-full object-cover ken-burns">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-600/80 to-transparent"></div>
+                </div>
+                <div class="relative z-10 h-full flex items-center p-10 md:p-20">
+                    <div class="anim-spring">
+                        <h2 class="text-6xl font-bold text-white mb-2 brand-font drop-shadow-lg">Summer Sale</h2>
+                        <p class="text-xl text-white/90 mb-6">Up to 60% off</p>
+                        <button class="bg-white text-pink-600 font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 ripple-btn" onclick="filterProducts('All')">
+                            Shop Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            app.appendChild(banner);
+
+            const container = create('div', 'container mx-auto px-4 py-10');
+            container.innerHTML = `<h3 id="page-title" class="text-xl font-bold text-gray-800 mb-6 border-l-4 border-pink-500 pl-3">ALL PRODUCTS</h3>`;
+            
+            const grid = create('div', 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6');
+            
+            // Skeletons
+            for(let i=0; i<8; i++) {
+                grid.innerHTML += `
+                    <div class="rounded-xl overflow-hidden">
+                        <div class="cms-loading h-80 w-full"></div>
+                        <div class="p-4"><div class="cms-loading h-4 w-3/4 mb-2"></div><div class="cms-loading h-4 w-1/2"></div></div>
+                    </div>
+                `;
+            }
+            container.appendChild(grid);
+            app.appendChild(container);
+
+            // Animate In
+            setTimeout(() => renderProductGrid(grid, DB.products), 500);
+        };
+
+        const renderProductGrid = (container, list) => {
+            container.innerHTML = '';
+            if(list.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No products found.</div>';
+                return;
+            }
+            list.forEach((p, i) => {
+                const card = create('div', `card-shadow bg-white rounded-xl overflow-hidden anim-spring cursor-pointer`);
+                card.style.animationDelay = `${i * 0.05}s`;
+                
+                card.innerHTML = `
+                    <div class="product-img-box" onclick="navigate('product', ${p.id})">
+                        <img src="${p.image}" loading="lazy" alt="${p.title}" class="w-full h-full object-cover">
+                        <div class="absolute top-2 left-2 bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg">${p.discount} OFF</div>
+                        <button onclick="event.stopPropagation(); toggleWish(${p.id})" class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow hover:scale-125 transition-transform">
+                            <svg class="w-4 h-4 ${DB.wishlist.includes(p.id) ? 'text-pink-500 fill-current' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        </button>
+                    </div>
+                    <div class="p-4 relative">
+                        <h4 class="font-bold text-sm text-gray-800 truncate">${p.brand}</h4>
+                        <p class="text-gray-500 text-xs truncate mb-2">${p.title}</p>
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-bold text-base">₹${p.price.toLocaleString()}</span>
+                            <span class="text-gray-400 text-xs line-through">₹${p.originalPrice.toLocaleString()}</span>
+                        </div>
+                        <button onclick="addToCart(event, ${p.id}, '${p.image}')" class="mt-3 w-full bg-pink-50 text-pink-600 font-bold py-2 text-xs rounded hover:bg-pink-500 hover:text-white transition-all ripple-btn">
+                            ADD TO BAG
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // ==========================================
+        // 6. ANIMATION: FLY TO CART
+        // ==========================================
+        window.addToCart = (e, id, imgSrc) => {
+            if(!DB.cart.find(i => i.id === id)) {
+                DB.cart.push({id: id});
+                save();
+                
+                // Fly Animation
+                const cartIcon = $('cart-icon-container').getBoundingClientRect();
+                const flyer = document.createElement('div');
+                flyer.className = 'fly-img rounded-xl overflow-hidden';
+                flyer.innerHTML = `<img src="${imgSrc}" class="w-20 h-24 object-cover">`;
+                
+                document.body.appendChild(flyer);
+                const startRect = e.target.getBoundingClientRect();
+                flyer.style.left = startRect.left + 'px';
+                flyer.style.top = startRect.top + 'px';
+
+                setTimeout(() => {
+                    flyer.style.left = cartIcon.left + 10 + 'px';
+                    flyer.style.top = cartIcon.top + 10 + 'px';
+                    flyer.style.transform = 'scale(0.1) rotate(360deg)';
+                    flyer.style.opacity = '0.5';
+                }, 10);
+
+                setTimeout(() => {
+                    flyer.remove();
+                    // Pulse the cart icon
+                    const icon = $('cart-icon-container');
+                    icon.style.transform = "scale(1.3)";
+                    setTimeout(() => icon.style.transform = "scale(1)", 200);
+                }, 900);
+                
+                showToast("Added to Bag");
+            } else {
+                showToast("Already in Bag");
+            }
+        };
+
+        // ==========================================
+        // 7. RENDER: PRODUCT DETAIL
+        // ==========================================
+        const renderProduct = (id) => {
+            const p = DB.products.find(x => x.id === id);
+            if(!p) return;
+            const app = $('app');
+            app.appendChild(renderHeader());
+
+            const container = create('div', 'max-w-5xl mx-auto p-6 anim-spring');
+            container.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-12 bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div class="relative bg-gray-50 p-4 flex items-center justify-center">
+                        <img src="${p.image}" class="w-full max-h-[500px] object-contain transition duration-500 hover:scale-110">
+                    </div>
+                    <div class="p-8 flex flex-col border-l">
+                        <p class="text-xs text-pink-500 font-bold uppercase tracking-widest">${p.brand}</p>
+                        <h1 class="text-2xl font-bold text-gray-800 mt-2 mb-4">${p.title}</h1>
+                        
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded font-bold flex items-center gap-1">
+                                ${p.rating} <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            </span>
+                            <span class="text-gray-500 text-sm">${p.reviews.toLocaleString()} Reviews</span>
+                        </div>
+
+                        <hr class="mb-6">
+
+                        <div class="flex items-baseline gap-3 mb-6">
+                            <span class="text-4xl font-bold text-gray-900">₹${p.price.toLocaleString()}</span>
+                            <span class="text-xl text-gray-400 line-through">₹${p.originalPrice.toLocaleString()}</span>
+                            <span class="text-lg font-bold text-green-600">${p.discount} OFF</span>
+                        </div>
+
+                        <div class="flex gap-3 mt-auto">
+                            <button onclick="addToCart(event, ${p.id}, '${p.image}')" class="flex-1 bg-pink-500 text-white py-4 rounded-lg font-bold hover:bg-pink-600 transition-all ripple-btn shadow-lg shadow-pink-200 active:scale-95">
+                                ADD TO BAG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            app.appendChild(container);
+        };
+
+        // ==========================================
+        // 8. RENDER: CART
+        // ==========================================
+        const renderCart = () => {
+            const app = $('app');
+            app.appendChild(renderHeader());
+            let total = 0;
+            let totalMrp = 0;
+
+            const container = create('div', 'container mx-auto p-6');
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-6 text-gray-800">Shopping Bag</h2>`;
+            
+            const grid = create('div', 'grid md:grid-cols-3 gap-8');
+            const items = create('div', 'md:col-span-2 space-y-4');
+
+            if(DB.cart.length === 0) {
+                items.innerHTML = `<div class="text-center py-12 bg-white rounded-xl text-gray-500">Your bag is empty.</div>`;
+            } else {
+                DB.cart.forEach((item, i) => {
+                    const p = DB.products.find(x => x.id === item.id);
+                    if(!p) return;
+                    total += p.price;
+                    totalMrp += p.originalPrice;
+                    items.innerHTML += `
+                        <div class="flex gap-4 bg-white p-4 rounded-xl shadow-sm anim-spring hover:shadow-md transition-shadow" style="animation-delay: ${i*0.1}s">
+                            <img src="${p.image}" class="w-24 h-28 object-cover rounded-lg shadow-inner">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800">${p.brand}</h3>
+                                <p class="text-xs text-gray-500 mb-2">${p.title}</p>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold">₹${p.price.toLocaleString()}</span>
+                                    <span class="text-gray-400 text-xs line-through">₹${p.originalPrice.toLocaleString()}</span>
+                                </div>
+                                <button onclick="removeFromCart(${p.id})" class="mt-2 text-xs text-red-400 font-bold hover:text-red-600 transition-colors">Remove</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            grid.appendChild(items);
+            const summary = create('div', 'bg-white p-6 rounded-xl shadow-sm h-fit sticky top-20 anim-spring');
+            summary.innerHTML = `
+                <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wider">Price Details</h3>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex justify-between"><span>Total MRP</span><span>₹${totalMrp.toLocaleString()}</span></div>
+                    <div class="flex justify-between text-green-500"><span>Discount</span><span>-₹${(totalMrp - total).toLocaleString()}</span></div>
+                    <div class="flex justify-between"><span>Convenience Fee</span><span class="text-green-500">FREE</span></div>
+                </div>
+                <hr class="my-4">
+                <div class="flex justify-between font-bold text-lg mb-6"><span>Total Amount</span><span class="text-pink-600">₹${total.toLocaleString()}</span></div>
+                <button onclick="navigate('checkout')" class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition ripple-btn active:scale-95">
+                    PLACE ORDER
+                </button>
+            `;
+            grid.appendChild(summary);
+            container.appendChild(grid);
+            app.appendChild(container);
+        };
+
+        // ==========================================
+        // 9. RENDER: CHECKOUT
+        // ==========================================
+        const renderCheckout = () => {
+            const app = $('app');
+            const u = DB.user;
+            let total = DB.cart.reduce((sum, i) => { const p = DB.products.find(x=>x.id===i.id); return sum + (p ? p.price : 0); }, 0);
+
+            const container = create('div', 'min-h-screen bg-gray-100');
+            container.innerHTML = `
+                <div class="bg-pink-500 text-white p-4 text-center font-bold">🔒 Secure Checkout</div>
+                <div class="container mx-auto p-6 grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- Address -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm anim-spring">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-bold text-gray-700">1. Delivery Address</h3>
+                                <button onclick="toggleEditAddress()" class="text-pink-600 text-xs font-bold hover:underline">Change</button>
+                            </div>
+                            <div id="addr-view">
+                                <p class="font-bold text-sm">${u.name}</p>
+                                <p class="text-xs text-gray-500 mt-1">${u.address}, ${u.city}</p>
+                            </div>
+                            <div id="addr-edit" class="hidden space-y-2 mt-2">
+                                <input type="text" id="input-name" value="${u.name}" class="w-full border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                <input type="text" id="input-addr" value="${u.address}" class="w-full border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                <div class="flex gap-2">
+                                    <input type="text" id="input-city" value="${u.city}" class="w-1/2 border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                    <input type="text" id="input-pin" value="${u.pincode}" class="w-1/2 border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                </div>
+                                <button onclick="saveAddress()" class="bg-pink-500 text-white px-4 py-2 rounded text-sm mt-2 ripple-btn active:scale-95">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Payment -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm anim-spring delay-1">
+                            <h3 class="font-bold text-gray-700 mb-4">2. Payment Options</h3>
+                            
+                            <div class="space-y-2">
+                                <div onclick="selectPay('upi', this)" class="payment-option selected flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pink-300">
+                                    <input type="radio" name="pay" checked class="mr-3 accent-pink-500"> 
+                                    <span class="font-medium text-sm">UPI / QR Code</span>
+                                </div>
+                                <div id="sec-upi" class="p-4 bg-gray-50 rounded-lg mt-2 anim-spring">
+                                    <div class="flex flex-col md:flex-row items-center gap-6">
+                                        <div id="qrcode" class="bg-white p-2 border rounded shadow-sm"></div>
+                                        <div class="text-center md:text-left">
+                                            <p class="font-bold text-gray-700">Scan to Pay</p>
+                                            <p class="text-xs text-gray-500 mb-3">Amount: ₹${total.toLocaleString()}</p>
+                                            <button onclick="simPay()" class="bg-green-600 text-white px-4 py-2 rounded text-xs font-bold ripple-btn hover:bg-green-700 transition active:scale-95">Simulate Payment</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div onclick="selectPay('card', this)" class="payment-option flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pink-300 mt-2">
+                                    <input type="radio" name="pay" class="mr-3 accent-pink-500"> 
+                                    <span class="font-medium text-sm">Credit / Debit Card</span>
+                                </div>
+                                <div id="sec-card" class="hidden p-4 bg-gray-50 rounded-lg mt-2 space-y-2">
+                                    <input type="text" placeholder="Card Number" class="w-full border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                    <div class="flex gap-2">
+                                        <input type="text" placeholder="MM/YY" class="w-1/2 border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                        <input type="text" placeholder="CVV" class="w-1/2 border p-2 text-sm rounded outline-none focus:ring-2 ring-pink-300 transition-all">
+                                    </div>
+                                    <button onclick="simPay()" class="w-full bg-gray-900 text-white py-2 rounded text-sm mt-2 ripple-btn hover:bg-gray-800 transition active:scale-95">Pay ₹${total.toLocaleString()}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-sm sticky top-20 anim-spring delay-2">
+                            <div class="flex justify-between font-bold text-lg mb-6"><span>Total</span><span class="text-pink-600">₹${total.toLocaleString()}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            app.appendChild(container);
+            
+            if(window.QRCode) {
+                $('qrcode').innerHTML = '';
+                new QRCode($('qrcode'), { text: `upi://pay?pa=shop@upi&am=${total}`, width: 140, height: 140 });
+            }
+        };
+
+        // ==========================================
+        // 10. RENDER: SUCCESS (SVG Animation)
+        // ==========================================
+        const renderSuccess = () => {
+            DB.cart = []; save();
+            const app = $('app');
+            app.innerHTML = `
+                <div class="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-50 to-white text-center p-6">
+                    <div class="anim-spring">
+                        <svg class="checkmark mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                        <h1 class="text-3xl font-bold text-gray-800 mt-6 mb-2">Order Placed!</h1>
+                        <p class="text-gray-500 mb-8">Thank you for shopping.</p>
+                        <button onclick="navigate('home')" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-600 transition ripple-btn active:scale-95">
+                            Continue Shopping
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // ==========================================
+        // 11. ACTIONS & LOGIC
+        // ==========================================
+        window.toggleSidebar = () => {
+            $('sidebar').classList.toggle('open');
+            const overlay = $('overlay');
+            const isOpen = $('sidebar').classList.contains('open');
+            if(isOpen) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        };
+
+        window.filterProducts = (cat) => {
+            const filtered = cat === 'All' ? DB.products : DB.products.filter(p => p.category === cat);
+            const grid = document.querySelector('.grid');
+            const title = $('page-title');
+            if(title) title.innerText = cat.toUpperCase();
+            if(grid) renderProductGrid(grid, filtered);
+            toggleSidebar();
+        };
+
+        window.searchProducts = (term) => {
+            const filtered = DB.products.filter(p => p.title.toLowerCase().includes(term.toLowerCase()));
+            const grid = document.querySelector('.grid');
+            if(grid) renderProductGrid(grid, filtered);
+        };
+
+        window.removeFromCart = (id) => {
+            DB.cart = DB.cart.filter(i => i.id !== id);
+            save();
+            renderCart();
+        };
+
+        window.toggleWish = (id) => {
+            const index = DB.wishlist.indexOf(id);
+            if(index > -1) DB.wishlist.splice(index, 1);
+            else DB.wishlist.push(id);
+            localStorage.setItem('wishlist', JSON.stringify(DB.wishlist));
+            showToast(index > -1 ? "Removed" : "Wishlisted ❤️");
+            // Simple refresh logic for demo
+            const grid = document.querySelector('.grid');
+            if(grid) renderProductGrid(grid, DB.products);
+        };
+
+        window.selectPay = (type, el) => {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected', 'border-pink-500'));
+            el.classList.add('selected', 'border-pink-500');
+            el.querySelector('input').checked = true;
+            
+            $('sec-upi').classList.add('hidden');
+            $('sec-card').classList.add('hidden');
+            if(type === 'upi') $('sec-upi').classList.remove('hidden');
+            if(type === 'card') $('sec-card').classList.remove('hidden');
+        };
+
+        window.toggleEditAddress = () => {
+            $('addr-view').classList.toggle('hidden');
+            $('addr-edit').classList.toggle('hidden');
+        };
+
+        window.saveAddress = () => {
+            DB.user.name = $('input-name').value;
+            DB.user.address = $('input-addr').value;
+            $('addr-view').innerHTML = `<p class="font-bold text-sm">${DB.user.name}</p><p class="text-xs text-gray-500 mt-1">${DB.user.address}</p>`;
+            toggleEditAddress();
+            showToast("Address Saved");
+        };
+
+        window.simPay = () => {
+            showToast("Payment Success!");
+            setTimeout(() => navigate('success'), 1000);
+        };
+
+        // Global Ripple Listener
+        document.addEventListener('click', function(e) {
+            if(e.target.classList.contains('ripple-btn')) {
+                createRipple(e);
+            }
+        });
+
+        // Init
+        navigate('home');
+
+    </script>
+</body>
+</html>
